@@ -2,7 +2,6 @@
 
 Ein Model-Context-Protocol (MCP) Server für ProAlpha MSSQL-Datenbanken, der eine Read-Only-Schnittstelle zu Ihrer Datenbank bereitstellt und automatisch Schemas erfasst.
 
-
 ## Funktionen
 
 - Verbindung zu ProAlpha MSSQL-Datenbanken
@@ -10,7 +9,6 @@ Ein Model-Context-Protocol (MCP) Server für ProAlpha MSSQL-Datenbanken, der ein
 - Bereitstellung von Tabellenstrukturen als MCP-Ressourcen
 - Tools für Read-Only SQL-Abfragen
 - Prompts für gängige Datenanalyseaufgaben
-- REST-API für direkten Zugriff auf Schemainformationen
 
 ## Anforderungen
 
@@ -33,11 +31,9 @@ pip install -r requirements.txt
 Erstellen Sie eine `.env` Datei mit den folgenden Einstellungen:
 
 ```ini
-DB_SERVER=your_server_address
-DB_NAME=your_database_name
-DB_USER=your_username
-DB_PASSWORD=your_password
-DB_DRIVER={ODBC Driver 17 for SQL Server}
+DB_SERVER_HOST=your_server_address
+DB_SERVER_PORT=8080
+DB_API_KEY=your_api_key
 MCP_PORT=8000
 MCP_HOST=0.0.0.0
 SCHEMA_CACHE_PATH=./schema_cache
@@ -56,46 +52,53 @@ Dies erstellt eine `mcp_prompts.json`-Datei mit Standardvorlagen für Prompts un
 ### Server starten
 
 ```bash
-python main.py
+python -m app
 ```
 
 Der Server wird standardmäßig auf Port 8000 gestartet.
 
-### REST-API verwenden
+### Verbindung mit MCP Inspector
 
-- `GET /api/schema` - Gibt das gesamte Datenbankschema zurück
-- `GET /api/schema/tables` - Gibt eine Liste aller Tabellen zurück
-- `GET /api/schema/tables/{table_name}` - Gibt das Schema einer bestimmten Tabelle zurück
-- `GET /api/schema/views` - Gibt eine Liste aller Views zurück
-- `GET /api/schema/views/{view_name}` - Gibt das Schema einer bestimmten View zurück
-- `GET /api/schema/relationships` - Gibt alle Tabellenbeziehungen zurück
-- `POST /api/query` - Führt eine Read-Only-SQL-Abfrage aus
-- `POST /api/schema/refresh` - Aktualisiert den Schema-Cache
+```bash
+npx @modelcontextprotocol/inspector python -m app
+```
+Öffnen Sie den [MCP Inspector](http://127.0.0.1:6274/) und verbinden Sie sich mit Ihrem Server (z.B. `ws://localhost:8000/sse`).
 
-### MCP-Endpunkt
+### HTTP REST-API verwenden
 
-Der MCP-Endpunkt ist über die SSE-Schnittstelle (Server-Sent Events) erreichbar:
-- `/sse` - SSE-Endpunkt für die MCP-Kommunikation
-- `/messages/` - Endpunkt für MCP-Nachrichten
+Die REST-API ist parallel zum MCP-Server auf Port 8000 verfügbar. Beispiele für Endpunkte:
+
+- `GET /api/schema` – Gibt das gesamte Datenbankschema zurück
+- `GET /api/schema/tables` – Gibt eine Liste aller Tabellen zurück
+- `GET /api/schema/tables/{table_name}` – Gibt das Schema einer bestimmten Tabelle zurück
+- `GET /api/schema/views` – Gibt eine Liste aller Views zurück
+- `GET /api/schema/views/{view_name}` – Gibt das Schema einer bestimmten View zurück
+- `GET /api/schema/relationships` – Gibt alle Tabellenbeziehungen zurück
+- `POST /api/query` – Führt eine Read-Only-SQL-Abfrage aus (JSON: `{ "query": "SELECT ..." }`)
+- `POST /api/schema/refresh` – Aktualisiert den Schema-Cache
+
+Beispiel für eine SQL-Abfrage per curl:
+
+```bash
+curl -X POST http://localhost:8000/api/query -H "Content-Type: application/json" -d '{"query": "SELECT TOP 5 * FROM BeispielTabelle"}'
+```
 
 ## MCP-Ressourcen
 
 Der Server stellt folgende MCP-Ressourcen bereit:
 
-- `database_schema` - Das vollständige Datenbankschema
-- `table_{name}` - Schema jeder Tabelle
-- `view_{name}` - Schema jeder View
-- `relationships` - Beziehungen zwischen den Tabellen
+- `resource://database_schema` – Das vollständige Datenbankschema
+- `table://{table_name}` – Schema jeder Tabelle
+- `view://{view_name}` – Schema jeder View
+- `resource://relationships` – Beziehungen zwischen den Tabellen
 
 ## MCP-Tools
 
 Der Server stellt folgende MCP-Tools bereit:
 
-- `execute_sql` - Führt eine Read-Only-SQL-Abfrage aus
-- `get_table_sample` - Gibt eine Stichprobe der Daten einer Tabelle zurück
-- `refresh_schema` - Aktualisiert den Schema-Cache
-- `generate_table_documentation` - Erstellt eine detaillierte Dokumentation einer Tabelle
-- `search_schema` - Sucht nach Tabellen und Spalten im Datenbankschema
+- `execute_sql` – Führt eine Read-Only-SQL-Abfrage aus
+- `get_table_sample` – Gibt eine Stichprobe der Daten einer Tabelle zurück
+- `refresh_schema` – Aktualisiert den Schema-Cache
 
 ## Testen des Servers
 
@@ -103,13 +106,13 @@ Das Repository enthält ein Test-Skript, mit dem die grundlegende Funktionalitä
 
 ```bash
 # Server in einem Terminal starten
-python main.py
+python -m app
 
 # In einem anderen Terminal das Test-Skript ausführen
 ./test_server.py
 ```
 
-Das Test-Skript überprüft die Web-API-Endpunkte und gibt Informationen zu deren Status aus.
+Das Test-Skript prüft die MCP-Serverfunktionalität und kann auch REST-API-Endpunkte testen.
 
 ## Beispiel für MCP-Anfragen
 
@@ -140,23 +143,6 @@ Das Test-Skript überprüft die Web-API-Endpunkte und gibt Informationen zu dere
       "parameters": {
         "table_name": "BeispielTabelle",
         "limit": 5
-      }
-    }
-  ]
-}
-```
-
-### Tabellendokumentation erstellen
-
-```json
-{
-  "resources": [],
-  "tools": [
-    {
-      "id": "generate_table_documentation",
-      "parameters": {
-        "table_name": "BeispielTabelle",
-        "include_sample_data": true
       }
     }
   ]
