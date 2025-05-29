@@ -1,0 +1,11 @@
+# MCP-Server Abhängigkeiten
+fastmcp>=2.0.0  # FastMCP v2 for modern MCP servers
+mcp[cli]>=1.9.0  # Official Python SDK with CLI tools
+mcp>=0.1.0  # Official Python SDK from the Model Context Protocol
+requests>=2.31.0  # HTTP-Requests für API-Zugriff
+fastapi>=0.95.0
+uvicorn>=0.21.1
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+starlette>=0.36.3
+anyio>=3.7.1

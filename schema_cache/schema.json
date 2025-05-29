@@ -1,0 +1,31 @@
+{
+  "tables": {
+    "sample_table": {
+      "name": "sample_table",
+      "columns": [
+        {
+          "name": "id",
+          "type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "identity": true
+        },
+        {
+          "name": "name",
+          "type": "varchar",
+          "length": 100,
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "datetime",
+          "nullable": false,
+          "primary_key": false
+        }
+      ]
+    }
+  },
+  "views": {},
+  "relationships": []
+}

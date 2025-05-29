@@ -1,0 +1,138 @@
+{
+  "prompts": {
+    "database_analysis": {
+      "title": "Datenbankanalyse",
+      "description": "Analysiert die Struktur und Beziehungen einer Tabelle",
+      "template": "Analysiere die Tabelle {{table_name}} aus der ProAlpha-Datenbank. Beschreibe ihre Struktur, Zweck und Beziehungen zu anderen Tabellen. Gib auch Beispiele für typische Abfragen an."
+    },
+    "sql_query": {
+      "title": "SQL-Abfrage erstellen",
+      "description": "Erstellt eine SQL-Abfrage für eine bestimmte Geschäftsfrage",
+      "template": "Schreibe eine SQL-Abfrage für die folgende Geschäftsfrage: {{business_question}}\n\nVerwende nur die Tabellen und Spalten, die im Datenbankschema vorhanden sind. Die Abfrage sollte effizient sein und nur die notwendigen Daten zurückgeben."
+    },
+    "schema_exploration": {
+      "title": "Schema erkunden",
+      "description": "Erkundet das Datenbankschema nach bestimmten Suchbegriffen",
+      "template": "Finde alle Tabellen und Spalten in der ProAlpha-Datenbank, die mit dem Begriff '{{search_term}}' zu tun haben könnten. Erkläre, wie diese Tabellen und Spalten miteinander in Beziehung stehen und wofür sie wahrscheinlich verwendet werden."
+    },
+    "data_summary": {
+      "title": "Datenzusammenfassung",
+      "description": "Erstellt eine Zusammenfassung der Daten in einer Tabelle",
+      "template": "Erstelle eine Zusammenfassung der Daten in der Tabelle {{table_name}}. Gib Informationen wie Anzahl der Datensätze, Häufigkeitsverteilungen wichtiger Spalten und auffällige Muster an."
+    },
+    "relationship_analysis": {
+      "title": "Beziehungsanalyse",
+      "description": "Analysiert die Beziehungen zwischen Tabellen",
+      "template": "Analysiere die Beziehungen zwischen der Tabelle {{table_name}} und anderen Tabellen in der ProAlpha-Datenbank. Erstelle ein Diagramm, das die wichtigsten Beziehungen darstellt und erkläre, wie diese Tabellen zusammenhängen."
+    },
+    "business_insights": {
+      "title": "Geschäftseinblicke",
+      "description": "Generiert Geschäftseinblicke aus den Daten",
+      "template": "Basierend auf den Daten in der ProAlpha-Datenbank, welche Einblicke könntest du zu {{business_area}} geben? Betrachte Trends, Muster und potenzielle Optimierungsmöglichkeiten."
+    }
+  },
+  "tools": {
+    "execute_sql": {
+      "description": "Verwende dieses Tool, um SQL-Abfragen zu erstellen und auszuführen.",
+      "examples": [
+        {
+          "question": "Wie viele Kunden haben wir pro Region?",
+          "query": "SELECT Region, COUNT(*) AS AnzahlKunden FROM Kunden GROUP BY Region ORDER BY AnzahlKunden DESC"
+        },
+        {
+          "question": "Welche Produkte haben den höchsten Umsatz im letzten Monat?",
+          "query": "SELECT p.Produktname, SUM(bp.Menge * bp.Preis) AS Umsatz FROM Bestellpositionen bp JOIN Produkte p ON bp.ProduktID = p.ProduktID WHERE DATEDIFF(MONTH, bp.Bestelldatum, GETDATE()) = 1 GROUP BY p.Produktname ORDER BY Umsatz DESC"
+        }
+      ]
+    },
+    "get_table_sample": {
+      "description": "Verwende dieses Tool, um Beispieldaten aus einer Tabelle zu erhalten.",
+      "examples": [
+        {
+          "request": "Zeige mir Beispieldaten aus der Kundentabelle",
+          "tool_call": {"table_name": "Kunden", "limit": 5}
+        }
+      ]
+    },
+    "generate_table_documentation": {
+      "description": "Verwende dieses Tool, um eine detaillierte Dokumentation einer Tabelle zu generieren.",
+      "examples": [
+        {
+          "request": "Erstelle eine Dokumentation für die Bestelltabelle",
+          "tool_call": {"table_name": "Bestellungen", "include_sample_data": true}
+        }
+      ]
+    },
+    "search_schema": {
+      "description": "Verwende dieses Tool, um nach Tabellen und Spalten im Schema zu suchen.",
+      "examples": [
+        {
+          "request": "Finde alle Tabellen und Spalten, die mit 'Kunden' zu tun haben",
+          "tool_call": {"search_term": "Kunden", "search_in_columns": true}
+        }
+      ]
+    }
+  },
+  "proalpha_specific": {
+    "common_tables": [
+      {
+        "name": "Adressen",
+        "description": "Enthält Adressdaten für Kunden, Lieferanten und andere Geschäftspartner"
+      },
+      {
+        "name": "Artikel",
+        "description": "Enthält Informationen zu Produkten und Dienstleistungen"
+      },
+      {
+        "name": "Auftraege",
+        "description": "Enthält Kundenauftragsdaten"
+      },
+      {
+        "name": "Bestellungen",
+        "description": "Enthält Bestelldaten bei Lieferanten"
+      },
+      {
+        "name": "Geschaeftspartner",
+        "description": "Enthält Informationen zu Kunden, Lieferanten und anderen Geschäftspartnern"
+      },
+      {
+        "name": "Lager",
+        "description": "Enthält Informationen zu Lagerbeständen"
+      },
+      {
+        "name": "Mitarbeiter",
+        "description": "Enthält Informationen zu Mitarbeitern"
+      },
+      {
+        "name": "Rechnungen",
+        "description": "Enthält Rechnungsdaten"
+      }
+    ],
+    "common_fields": [
+      {
+        "name": "GUID",
+        "description": "Eindeutige Kennung für jeden Datensatz"
+      },
+      {
+        "name": "Mandant",
+        "description": "Gibt an, zu welchem Mandanten der Datensatz gehört"
+      },
+      {
+        "name": "Beleg",
+        "description": "Belegnummer für verschiedene Transaktionen"
+      },
+      {
+        "name": "Datum",
+        "description": "Datum der Transaktion"
+      },
+      {
+        "name": "Benutzer",
+        "description": "Benutzer, der den Datensatz erstellt oder geändert hat"
+      },
+      {
+        "name": "Status",
+        "description": "Status des Datensatzes"
+      }
+    ]
+  }
+}
