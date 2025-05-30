@@ -55,6 +55,11 @@ Dies erstellt eine `mcp_prompts.json`-Datei mit Standardvorlagen für Prompts un
 python -m app
 ```
 
+(optional) mit fastmcp-cli:
+```bash
+fastmcp run mcp-proalpha.py
+```
+
 Der Server wird standardmäßig auf Port 8000 gestartet.
 
 ### Verbindung mit MCP Inspector
