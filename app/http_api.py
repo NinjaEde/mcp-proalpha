@@ -1,7 +1,9 @@
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi.responses import StreamingResponse
 from .database import DatabaseManager
 import logging
+import asyncio
+import json
 
 logger = logging.getLogger("mcp-proalpha-http")
 app = FastAPI(title="ProAlpha MCP REST API")
@@ -58,3 +60,43 @@ async def post_query(request: Request):
 def refresh_schema():
     db.refresh_schema_cache()
     return {"status": "Schema cache refreshed"}
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            data = await websocket.receive_text()
+            try:
+                msg = json.loads(data)
+                # Beispiel: MCP-Tool-Request
+                if msg.get("id") == "execute_sql":
+                    query = msg["parameters"]["query"]
+                    result = db.execute_query(query)
+                    await websocket.send_text(json.dumps({"result": result}))
+                elif msg.get("id") == "get_table_sample":
+                    table = msg["parameters"]["table_name"]
+                    limit = msg["parameters"].get("limit", 10)
+                    result = db.get_table_sample(table, limit)
+                    await websocket.send_text(json.dumps({"result": result}))
+                else:
+                    await websocket.send_text(json.dumps({"error": "Unknown tool id"}))
+            except Exception as e:
+                await websocket.send_text(json.dumps({"error": str(e)}))
+    except WebSocketDisconnect:
+        pass
+
+@app.get("/sse")
+async def sse_endpoint():
+    async def event_generator():
+        # Beispiel: Sende ein MCP-Tool-Request-Resultat als Stream
+        yield f"data: {json.dumps({'result': 'SSE-Stream aktiv'})}\n\n"
+        await asyncio.sleep(1)
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+@app.post("/sse")
+async def sse_endpoint_post():
+    async def event_generator():
+        yield f"data: {json.dumps({'result': 'SSE-Stream aktiv'})}\n\n"
+        await asyncio.sleep(1)
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
