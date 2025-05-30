@@ -2,7 +2,8 @@ from .logging_config import setup_logging
 from .database import DatabaseManager
 from fastmcp import FastMCP, Context
 import logging
-import os
+from .config import config
+
 
 setup_logging()
 logger = logging.getLogger("mcp-proalpha")
@@ -49,6 +50,6 @@ async def refresh_schema(ctx: Context) -> str:
     return "Schema cache refreshed."
 
 def run():
-    mcp_host = int(os.environ.get("MCP_HOST", "0.0.0.0"))
-    mcp_port = int(os.environ.get("MCP_PORT", 8000))      
+    mcp_host = config.MCP_HOST
+    mcp_port = int(config.MCP_PORT)
     mcp.run(transport="streamable-http", host=mcp_host, port=mcp_port, path="/mcp")

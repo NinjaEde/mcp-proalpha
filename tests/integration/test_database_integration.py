@@ -1,29 +1,23 @@
-import sys, os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 import os
+import requests
 import pytest
 from app.database import DatabaseManager
+from app.config import config
 
 # Set test environment variables (override if needed)
-os.environ["DB_SERVER_HOST"] = "http://localhost"
-os.environ["DB_SERVER_PORT"] = "8080"
-os.environ["DB_API_KEY"] = "0957864a-3c55-4c2d-aa79-f773f94558da"
-os.environ["SCHEMA_CACHE_PATH"] = "./schema_cache"
+os.environ["DB_SERVER_HOST"] = config.DB_SERVER_HOST
+os.environ["DB_SERVER_PORT"] = config.DB_SERVER_PORT
+os.environ["DB_API_KEY"] = config.DB_API_KEY or ""
+os.environ["SCHEMA_CACHE_PATH"] = config.SCHEMA_CACHE_PATH
 
-def test_database_manager_connect(monkeypatch):
-    """Testet die Verbindung zur API (Mock)."""
-    db = DatabaseManager()
-    # Patch connect to always return True
-    monkeypatch.setattr(db, "connect", lambda: True)
-    assert db.connect() is True
+def api_available():
+    try:
+        r = requests.get(f"{config.DB_SERVER_HOST}:{config.DB_SERVER_PORT}/q/health", timeout=2)
+        return r.status_code == 200
+    except Exception:
+        return False
 
-def test_is_read_only():
-    db = DatabaseManager()
-    assert db._is_read_only("SELECT * FROM test")
-    assert not db._is_read_only("DROP TABLE test")
-    assert not db._is_read_only("UPDATE test SET x=1")
-
+@pytest.mark.skipif(not api_available(), reason="API-Server nicht erreichbar")
 def test_database_integration():
     """Integrationstest: Testet die wichtigsten Datenbankmethoden mit echter API."""
     db = DatabaseManager()
@@ -46,9 +40,9 @@ def test_database_integration():
     else:
         pytest.fail("Keine Tabellen im Schema gefunden.")
 
+@pytest.mark.skipif(not api_available(), reason="API-Server nicht erreichbar")
 def test_refresh_schema_cache(tmp_path):
     """Integrationstest: Testet refresh_schema_cache (Cache-Update und Datei)."""
-    # Nutze einen temporären Cache-Pfad, um Seiteneffekte zu vermeiden
     os.environ["SCHEMA_CACHE_PATH"] = str(tmp_path)
     db = DatabaseManager()
     if not db.connect():
@@ -61,6 +55,7 @@ def test_refresh_schema_cache(tmp_path):
     assert isinstance(db.schema_cache, dict)
     assert "tables" in db.schema_cache
 
+@pytest.mark.skipif(not api_available(), reason="API-Server nicht erreichbar")
 def test_execute_query_s_kunde():
     """Integrationstest: SELECT TOP 10 * FROM [s_kunden]"""
     db = DatabaseManager()

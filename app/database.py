@@ -1,30 +1,23 @@
-import os
 import json
 import logging
 import requests
 from pathlib import Path
 from typing import Dict, List, Any
+from .config import config
 
 logger = logging.getLogger("mcp-proalpha")
 
-DB_SERVER_HOST = os.getenv("DB_SERVER_HOST", "http://localhost")
-DB_SERVER_PORT = os.getenv("DB_SERVER_PORT", "8080")
-DB_API_KEY = os.getenv("DB_API_KEY")
-SCHEMA_CACHE_PATH = os.getenv("SCHEMA_CACHE_PATH", "./schema_cache")
-API_SERVER_HOST = os.getenv("API_SERVER_HOST", "http://localhost")
-API_SERVER_PORT = os.getenv("API_SERVER_PORT", "8081")
-
 class DatabaseManager:
     def __init__(self):
-        self.db_host = DB_SERVER_HOST.rstrip("/")
-        self.db_port = DB_SERVER_PORT
+        self.db_host = config.DB_SERVER_HOST.rstrip("/")
+        self.db_port = config.DB_SERVER_PORT
         self.db_url = f"{self.db_host}:{self.db_port}"
 
-        self.api_host = API_SERVER_HOST.rstrip("/")
-        self.api_port = API_SERVER_PORT
+        self.api_host = config.API_SERVER_HOST.rstrip("/")
+        self.api_port = config.API_SERVER_PORT
         self.api_url = f"{self.api_host}:{self.api_port}/api/"        
 
-        self.api_key = DB_API_KEY
+        self.api_key = config.DB_API_KEY
         self.headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
@@ -38,7 +31,7 @@ class DatabaseManager:
             "views": {},
             "relationships": []
         }
-        self.schema_cache_dir = Path(SCHEMA_CACHE_PATH)
+        self.schema_cache_dir = Path(config.SCHEMA_CACHE_PATH)
         self.schema_cache_dir.mkdir(exist_ok=True)
         try:
             self.refresh_schema_cache()
