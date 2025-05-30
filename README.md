@@ -31,11 +31,13 @@ pip install -r requirements.txt
 Erstellen Sie eine `.env` Datei mit den folgenden Einstellungen:
 
 ```ini
-DB_SERVER_HOST=your_server_address
 DB_SERVER_PORT=8080
+DB_SERVER_HOST=http://localhost
 DB_API_KEY=your_api_key
 MCP_PORT=8000
 MCP_HOST=0.0.0.0
+API_SERVER_PORT=8081
+API_SERVER_HOST=http://localhost
 SCHEMA_CACHE_PATH=./schema_cache
 ```
 
