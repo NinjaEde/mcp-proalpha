@@ -49,5 +49,6 @@ async def refresh_schema(ctx: Context) -> str:
     return "Schema cache refreshed."
 
 def run():
-    mcp_port = int(os.environ.get("MCP_PORT", 8000))    
-    mcp.run(transport="streamable-http", host="127.0.0.1", port=mcp_port, path="/mcp")
+    mcp_host = int(os.environ.get("MCP_HOST", "0.0.0.0"))
+    mcp_port = int(os.environ.get("MCP_PORT", 8000))      
+    mcp.run(transport="streamable-http", host=mcp_host, port=mcp_port, path="/mcp")
