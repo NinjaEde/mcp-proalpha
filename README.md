@@ -58,11 +58,7 @@ SCHEMA_CACHE_PATH=./schema_cache
 
 6. Optional: Erstellen Sie eine Standard-Konfiguration für MCP-Prompts:
 
-```bash
-./generate_prompts.py
-```
-
-Dies erstellt eine `mcp_prompts.json`-Datei mit Standardvorlagen für Prompts und Toolbeispiele.
+Die Datei `mcp_prompts.json` enthält Beispiel-Standardvorlagen für Prompts und Toolbeispiele.
 
 ## Verwendung
 
