@@ -32,7 +32,7 @@ def test_server_start_and_schema():
     """Startet die HTTP-API im Hintergrund und prüft, ob die API erreichbar ist."""
     env = os.environ.copy()
     env["DB_SERVER_HOST"] = config.DB_SERVER_HOST
-    env["DB_SERVER_PORT"] = config.DB_SERVER_PORT
+    env["DB_SERVER_PORT"] = config.DB_SERVER_PORT_STR
     env["DB_API_KEY"] = config.DB_API_KEY or ""
     env["SCHEMA_CACHE_PATH"] = config.SCHEMA_CACHE_PATH
     env["API_SERVER_HOST"] = config.API_SERVER_HOST

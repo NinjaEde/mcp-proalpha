@@ -1,5 +1,6 @@
-import os
 from dotenv import load_dotenv
+from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 
 # .env nur einmal laden, falls noch nicht geschehen
 def _load_env():
@@ -8,15 +9,32 @@ def _load_env():
         _load_env._loaded = True
 _load_env()
 
-class Config:
-    DB_SERVER_HOST = os.getenv("DB_SERVER_HOST", "http://localhost")
-    DB_SERVER_PORT = os.getenv("DB_SERVER_PORT", "8080")
-    DB_API_KEY = os.getenv("DB_API_KEY")
-    SCHEMA_CACHE_PATH = os.getenv("SCHEMA_CACHE_PATH", "./schema_cache")
-    API_SERVER_HOST = os.getenv("API_SERVER_HOST", "http://localhost")
-    API_SERVER_PORT = os.getenv("API_SERVER_PORT", "8081")
-    MCP_HOST = os.getenv("MCP_HOST", "0.0.0.0")
-    MCP_PORT = os.getenv("MCP_PORT", "8000")
+class Config(BaseSettings):
+    DB_SERVER_HOST: str = "http://localhost"
+    DB_SERVER_PORT: int = 8080
+    DB_API_KEY: str = ""
+    SCHEMA_CACHE_PATH: str = "./schema_cache"
+    API_SERVER_HOST: str = "http://localhost"
+    API_SERVER_PORT: int = 8081
+    MCP_TRANSPORT: str = "streamable-http"  # stdio, streamable-http, sse
+    MCP_HOST: str = "0.0.0.0"
+    MCP_PORT: int = 8000
+
+    @property
+    def DB_SERVER_PORT_STR(self) -> str:
+        return str(self.DB_SERVER_PORT)
+
+    @property
+    def API_SERVER_PORT_STR(self) -> str:
+        return str(self.API_SERVER_PORT)
+
+    @property
+    def MCP_PORT_STR(self) -> str:
+        return str(self.MCP_PORT)
+
+    model_config = {
+        "env_file": ".env"
+    }
 
 # Instanz für konsistenten Zugriff
 config = Config()

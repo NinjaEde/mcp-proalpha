@@ -4,7 +4,7 @@ from app.config import config
 # Set test environment variables (override if needed)
 import os
 os.environ["DB_SERVER_HOST"] = config.DB_SERVER_HOST
-os.environ["DB_SERVER_PORT"] = config.DB_SERVER_PORT
+os.environ["DB_SERVER_PORT"] = config.DB_SERVER_PORT_STR
 os.environ["DB_API_KEY"] = config.DB_API_KEY or ""
 os.environ["SCHEMA_CACHE_PATH"] = config.SCHEMA_CACHE_PATH
 
