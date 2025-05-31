@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
 from .database import DatabaseManager
-from .tools import list_tools
+from .tools import list_all_tools
 from .server import mcp
 import logging
 import asyncio
@@ -15,14 +15,14 @@ def get_tools():
     """
     Gibt eine Liste aller verfügbaren Tools mit Name, Beschreibung und Parametern zurück (analog zu list_tools im MCP-Server).
     """
-    return list_tools(mcp)
+    return list_all_tools(mcp)
 
 @app.get("/api/tools/{tool_name}")
 def get_tool(tool_name: str):
     """
     Gibt die Details eines bestimmten Tools zurück, einschließlich Name, Beschreibung und Parametern.
     """
-    tools = list_tools(mcp)
+    tools = list_all_tools(mcp)
     for tool in tools:
         if tool["name"] == tool_name:
             return tool

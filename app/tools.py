@@ -1,7 +1,7 @@
 # Placeholder for future tool logic or custom MCP tools
 # You can implement additional MCP tools here if needed
 
-def list_tools(mcp_instance) -> list:
+def list_all_tools(mcp_instance) -> list:
     """Gibt eine Liste aller verfügbaren Tools mit Beschreibung und Parametern zurück."""
     result = []
     for tool in getattr(mcp_instance._tool_manager, "_tools", {}).values():

@@ -4,11 +4,11 @@ def test_list_tools():
 
     # FastMCP v2 speichert Tools als Dict unter mcp._tool_manager._tools
     tools_dict = getattr(mcp._tool_manager, "_tools", {})
-    assert "list_tools_tool" in tools_dict
+    assert "list_tools" in tools_dict
     # list_tools aufrufen (Tool-Objekt, nicht direkt callable)
-    result = tools_dict["list_tools_tool"].fn()
+    result = tools_dict["list_tools"].fn()
     assert isinstance(result, list)
-    found = any(tool.get("name") == "list_tools_tool" or tool.get("name") == "list_tools" for tool in result)
+    found = any(tool.get("name") == "list_tools" or tool.get("name") == "list_tools" for tool in result)
     assert found
     for tool in result:
         assert "name" in tool
@@ -20,7 +20,7 @@ def test_list_tools_content():
     import app.server
     mcp = app.server.mcp
     tools_dict = getattr(mcp._tool_manager, "_tools", {})
-    result = tools_dict["list_tools_tool"].fn()
+    result = tools_dict["list_tools"].fn()
     for tool in result:
         # Name sollte ein nicht-leerer String sein
         assert isinstance(tool["name"], str) and tool["name"].strip() != ""

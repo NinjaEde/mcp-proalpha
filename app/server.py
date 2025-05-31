@@ -3,7 +3,7 @@ from .database import DatabaseManager
 from fastmcp import FastMCP, Context
 import logging
 from .config import config
-from .tools import list_tools
+from .tools import list_all_tools
 
 
 setup_logging()
@@ -51,9 +51,9 @@ async def refresh_schema(ctx: Context) -> str:
     return "Schema cache refreshed."
 
 @mcp.tool()
-def list_tools_tool() -> list:
+def list_tools() -> list:
     """Gibt eine Liste aller verfügbaren Tools mit Beschreibung und Parametern zurück."""
-    return list_tools(mcp)
+    return list_all_tools(mcp)
 
 def run():
     transport = (getattr(config, "MCP_TRANSPORT", None) or "streamable-http").lower()
