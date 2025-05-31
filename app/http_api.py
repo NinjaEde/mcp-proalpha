@@ -1,8 +1,9 @@
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
-from .database import DatabaseManager
-from .tools import list_all_tools
 from .server import mcp
+from .database import DatabaseManager
+from .prompts import get_prompt_template, load_prompts
+from .tools import list_all_tools
 import logging
 import asyncio
 import json
@@ -119,4 +120,30 @@ async def sse_endpoint_post():
         yield f"data: {json.dumps({'result': 'SSE-Stream aktiv'})}\n\n"
         await asyncio.sleep(1)
     return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+@app.get("/api/prompts")
+def get_prompts():
+    """
+    Gibt eine Liste aller verfügbaren Prompts mit Name, Titel und Beschreibung zurück.
+    """
+    prompts = load_prompts()
+    return [
+        {
+            "name": name,
+            "title": prompt.get("title", ""),
+            "description": prompt.get("description", "")
+        }
+        for name, prompt in prompts.items()
+    ]
+
+@app.get("/api/prompts/{prompt_name}")
+def get_prompt(prompt_name: str):
+    """
+    Gibt das Template eines bestimmten Prompts zurück.
+    """
+    try:
+        template = get_prompt_template(prompt_name)
+        return {"name": prompt_name, "template": template}
+    except KeyError:
+        raise HTTPException(status_code=404, detail="Prompt not found")
 
