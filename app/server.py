@@ -51,16 +51,14 @@ async def refresh_schema(ctx: Context) -> str:
 
 @mcp.tool()
 def list_tools() -> list:
-    """
-    Gibt eine Liste aller verfügbaren Tools mit Beschreibung und Parametern zurück.
-    """
+    """Gibt eine Liste aller verfügbaren Tools mit Beschreibung und Parametern zurück."""
     result = []
     # FastMCP v2: Tools werden in mcp._tool_manager._tools als Dict gespeichert
     for tool in getattr(mcp._tool_manager, "_tools", {}).values():
         entry = {
             "name": getattr(tool, "name", None) or getattr(tool, "__name__", None),
             "description": getattr(tool, "description", ""),
-            "parameters": getattr(tool, "parameters_schema", None),
+            "parameters": getattr(tool, "parameters", None),
         }
         result.append(entry)
     return result
