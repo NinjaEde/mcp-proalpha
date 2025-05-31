@@ -127,6 +127,7 @@ Die REST-API ist parallel zum MCP-Server auf Port 8081 verfügbar. Beispiele fü
 - `POST /api/query` – Führt eine Read-Only-SQL-Abfrage aus (JSON: `{ "query": "SELECT ..." }`)
 - `POST /api/schema/refresh` – Aktualisiert den Schema-Cache
 - `GET /api/tools` – Gibt eine Liste aller verfügbaren Tools mit Name, Beschreibung und Parametern zurück (Tool-Discovery, analog zu `list_tools` im MCP-Server)
+- `GET /api/tools/{tool_name}` – Gibt die Details eines bestimmten Tools (Name, Beschreibung, Parameter) zurück
 
 Beispiel für eine SQL-Abfrage per curl:
 

@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
 from .database import DatabaseManager
+from .tools import list_tools
+from .server import mcp
 import logging
 import asyncio
 import json
@@ -8,6 +10,23 @@ import json
 logger = logging.getLogger("mcp-proalpha-http")
 app = FastAPI(title="ProAlpha MCP REST API")
 db = DatabaseManager()
+@app.get("/api/tools")
+def get_tools():
+    """
+    Gibt eine Liste aller verfügbaren Tools mit Name, Beschreibung und Parametern zurück (analog zu list_tools im MCP-Server).
+    """
+    return list_tools(mcp)
+
+@app.get("/api/tools/{tool_name}")
+def get_tool(tool_name: str):
+    """
+    Gibt die Details eines bestimmten Tools zurück, einschließlich Name, Beschreibung und Parametern.
+    """
+    tools = list_tools(mcp)
+    for tool in tools:
+        if tool["name"] == tool_name:
+            return tool
+    raise HTTPException(status_code=404, detail="Tool not found")
 
 @app.get("/api/schema")
 def get_schema():
@@ -101,18 +120,3 @@ async def sse_endpoint_post():
         await asyncio.sleep(1)
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
-@app.get("/api/tools")
-def get_tools():
-    """
-    Gibt eine Liste aller verfügbaren Tools mit Name, Beschreibung und Parametern zurück (analog zu list_tools im MCP-Server).
-    """
-    from .server import mcp
-    result = []
-    for tool in getattr(mcp._tool_manager, "_tools", {}).values():
-        entry = {
-            "name": getattr(tool, "name", None) or getattr(tool, "__name__", None),
-            "description": getattr(tool, "description", ""),
-            "parameters": getattr(tool, "parameters_schema", None),
-        }
-        result.append(entry)
-    return result
