@@ -49,7 +49,31 @@ async def refresh_schema(ctx: Context) -> str:
     await ctx.info("Schema cache refreshed.")
     return "Schema cache refreshed."
 
+@mcp.tool()
+def list_tools() -> list:
+    """
+    Gibt eine Liste aller verfügbaren Tools mit Beschreibung und Parametern zurück.
+    """
+    result = []
+    # FastMCP v2: Tools werden in mcp._tool_manager._tools als Dict gespeichert
+    for tool in getattr(mcp._tool_manager, "_tools", {}).values():
+        entry = {
+            "name": getattr(tool, "name", None) or getattr(tool, "__name__", None),
+            "description": getattr(tool, "description", ""),
+            "parameters": getattr(tool, "parameters_schema", None),
+        }
+        result.append(entry)
+    return result
+
 def run():
+    transport = (getattr(config, "MCP_TRANSPORT", None) or "streamable-http").lower()
     mcp_host = config.MCP_HOST
     mcp_port = int(config.MCP_PORT)
-    mcp.run(transport="streamable-http", host=mcp_host, port=mcp_port, path="/mcp")
+    if transport == "stdio":
+        mcp.run(transport="stdio")
+    elif transport == "streamable-http":
+        mcp.run(transport="streamable-http", host=mcp_host, port=mcp_port, path="/mcp")
+    elif transport == "sse":
+        mcp.run(transport="sse", host=mcp_host, port=mcp_port)
+    else:
+        raise ValueError(f"Unsupported MCP_TRANSPORT: {transport}")

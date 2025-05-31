@@ -13,8 +13,10 @@ Ein Model-Context-Protocol (MCP) Server für ProAlpha MSSQL-Datenbanken, der ein
 ## Anforderungen
 
 - Python 3.8 oder höher
-- ODBC-Treiber für SQL Server
-- Zugriff auf eine ProAlpha MSSQL-Datenbank
+- Zugriff auf eine laufende ProAlpha-API (siehe .env: DB_SERVER_HOST, DB_SERVER_PORT, DB_API_KEY)
+- Eine ProAlpha MSSQL-Datenbank (über die API erreichbar)
+
+> **Hinweis:** Ein ODBC-Treiber für SQL Server wird nur auf dem API-Server benötigt, der die Verbindung zur MSSQL-Datenbank herstellt. Für den MCP-Server selbst ist keine ODBC-Installation erforderlich.
 
 ## Installation
 
@@ -54,15 +56,35 @@ MCP_HOST=0.0.0.0
 API_SERVER_PORT=8081
 API_SERVER_HOST=http://localhost
 SCHEMA_CACHE_PATH=./schema_cache
+# Transport-Protokoll für den MCP-Server: stdio, streamable-http oder sse
+MCP_TRANSPORT=streamable-http
 ```
+
+- **MCP_TRANSPORT** bestimmt das Transport-Protokoll für den Server:
+
+| Transport-Protokoll   | Beschreibung                                         | Endpoint                         |
+|-----------------------|------------------------------------------------------|----------------------------------|
+| streamable-http       | Empfohlen für Web-Deployments  (Default)             | `http://localhost:8000/mcp`      |
+| stdio                 | Für lokale Tools und CLI-Skripte                     |                                  |
+| sse                   | Für Kompatibilität mit bestehenden SSE-Clients       | `http://localhost:8000/sse`      |
 
 6. Optional: Erstellen Sie eine Standard-Konfiguration für MCP-Prompts:
 
-Die Datei `mcp_prompts.json` enthält Beispiel-Standardvorlagen für Prompts und Toolbeispiele.
+```bash
+./app/generate_prompts.py
+```
+
+Dies erstellt eine `mcp_prompts.json`-Datei mit Standardvorlagen für Prompts und Toolbeispiele.
 
 ## Verwendung
 
 ### Server starten
+
+Der Server verwendet das in der `.env` konfigurierte Transport-Protokoll (`MCP_TRANSPORT`).
+
+- Für lokale CLI-Tools: `MCP_TRANSPORT=stdio`
+- Für Web-Deployments: `MCP_TRANSPORT=streamable-http`
+- Für SSE-Clients: `MCP_TRANSPORT=sse`
 
 ```bash
 python -m app
@@ -73,14 +95,14 @@ python -m app
 fastmcp run mcp-proalpha.py
 ```
 
-Der Server wird standardmäßig auf Port 8000 gestartet.
+Der Server wird standardmäßig auf Port 8000 gestartet (außer bei stdio).
 
 ### Verbindung mit MCP Inspector
 
 ```bash
 npx @modelcontextprotocol/inspector python -m app
 ```
-Öffnen Sie den [MCP Inspector](http://127.0.0.1:6274/) und verbinden Sie sich mit Ihrem Server (z.B. `ws://localhost:8000/sse`).
+Öffnen Sie den [MCP Inspector](http://127.0.0.1:6274/) und verbinden Sie sich mit Ihrem Server (z.B. `http://localhost:8000/sse`).
 
 #### Alternativ: MCP Inspector mit uvx
 
@@ -104,6 +126,7 @@ Die REST-API ist parallel zum MCP-Server auf Port 8000 verfügbar. Beispiele fü
 - `GET /api/schema/relationships` – Gibt alle Tabellenbeziehungen zurück
 - `POST /api/query` – Führt eine Read-Only-SQL-Abfrage aus (JSON: `{ "query": "SELECT ..." }`)
 - `POST /api/schema/refresh` – Aktualisiert den Schema-Cache
+- `GET /api/tools` – Gibt eine Liste aller verfügbaren Tools mit Name, Beschreibung und Parametern zurück (Tool-Discovery, analog zu `list_tools` im MCP-Server)
 
 Beispiel für eine SQL-Abfrage per curl:
 
@@ -127,6 +150,7 @@ Der Server stellt folgende MCP-Tools bereit:
 - `execute_sql` – Führt eine Read-Only-SQL-Abfrage aus
 - `get_table_sample` – Gibt eine Stichprobe der Daten einer Tabelle zurück
 - `refresh_schema` – Aktualisiert den Schema-Cache
+- `list_tools` – Gibt eine Liste aller verfügbaren Tools mit Beschreibung und Parametern zurück (nützlich für LLMs und Clients zur Tool-Discovery)
 
 ## Testen des Servers
 
@@ -201,6 +225,8 @@ Schreibe eine SQL-Abfrage, um [Geschäftsfrage] zu beantworten.
 Finde alle Tabellen und Spalten, die mit [Suchbegriff] zu tun haben könnten.
 ```
 
+> **Hinweis:** Mit dem Tool `list_tools` können LLMs und Clients alle verfügbaren Tools und deren Parameter dynamisch abfragen und so die Interaktion automatisieren oder Vorschläge generieren.
+
 ## Lizenz
 
-MIT
+MIT ([siehe LICENSE](./LICENSE))
