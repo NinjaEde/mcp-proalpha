@@ -1,9 +1,9 @@
-FROM python:3.11-slim
+FROM python:3.13-alpine
 
 WORKDIR /app
 
-# Systemabhängige Pakete (falls benötigt, z.B. für build tools)
-RUN apt-get update && apt-get install -y build-essential && rm -rf /var/lib/apt/lists/*
+# Systemabhängige Pakete (Alpine: build-base statt build-essential)
+RUN apk add --no-cache build-base
 
 # Installiere Abhängigkeiten
 COPY requirements.txt .
