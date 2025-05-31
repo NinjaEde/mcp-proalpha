@@ -20,13 +20,28 @@ Ein Model-Context-Protocol (MCP) Server für ProAlpha MSSQL-Datenbanken, der ein
 
 1. Repository klonen oder herunterladen
 
-2. Abhängigkeiten installieren:
+2. Neue Umgebung mit conda anlegen (empfohlen):
 
 ```bash
-pip install -r requirements.txt
+conda create -n mcp-proalpha python=3.11
+conda activate mcp-proalpha
 ```
 
-3. Konfigurationsdateien erstellen:
+3. uv installieren (falls nicht vorhanden):
+
+```bash
+pip install uv
+```
+
+4. Abhängigkeiten installieren:
+
+```bash
+uv pip install -r requirements.txt
+```
+
+> **Hinweis:** uv ist ein schneller, moderner Ersatz für pip und wird für die Installation empfohlen. Alternativ kann weiterhin pip verwendet werden.
+
+5. Konfigurationsdateien erstellen:
 
 Erstellen Sie eine `.env` Datei mit den folgenden Einstellungen:
 
@@ -41,7 +56,7 @@ API_SERVER_HOST=http://localhost
 SCHEMA_CACHE_PATH=./schema_cache
 ```
 
-4. Optional: Erstellen Sie eine Standard-Konfiguration für MCP-Prompts:
+6. Optional: Erstellen Sie eine Standard-Konfiguration für MCP-Prompts:
 
 ```bash
 ./generate_prompts.py
@@ -70,6 +85,16 @@ Der Server wird standardmäßig auf Port 8000 gestartet.
 npx @modelcontextprotocol/inspector python -m app
 ```
 Öffnen Sie den [MCP Inspector](http://127.0.0.1:6274/) und verbinden Sie sich mit Ihrem Server (z.B. `ws://localhost:8000/sse`).
+
+#### Alternativ: MCP Inspector mit uvx
+
+Falls Sie uvx (Node.js-Toolrunner von uv) installiert haben, können Sie den Inspector auch so starten:
+
+```bash
+uvx @modelcontextprotocol/inspector python -m app
+```
+
+> **Hinweis:** uvx funktioniert analog zu npx, ist aber oft schneller und kann für Node.js-basierte Tools verwendet werden.
 
 ### HTTP REST-API verwenden
 
