@@ -116,7 +116,7 @@ uvx @modelcontextprotocol/inspector python -m app
 
 ### HTTP REST-API verwenden
 
-Die REST-API ist parallel zum MCP-Server auf Port 8000 verfügbar. Beispiele für Endpunkte:
+Die REST-API ist parallel zum MCP-Server auf Port 8081 verfügbar. Beispiele für Endpunkte:
 
 - `GET /api/schema` – Gibt das gesamte Datenbankschema zurück
 - `GET /api/schema/tables` – Gibt eine Liste aller Tabellen zurück
@@ -131,7 +131,7 @@ Die REST-API ist parallel zum MCP-Server auf Port 8000 verfügbar. Beispiele fü
 Beispiel für eine SQL-Abfrage per curl:
 
 ```bash
-curl -X POST http://localhost:8000/api/query -H "Content-Type: application/json" -d '{"query": "SELECT TOP 5 * FROM BeispielTabelle"}'
+curl -X POST http://localhost:8081/api/query -H "Content-Type: application/json" -d '{"query": "SELECT TOP 5 * FROM BeispielTabelle"}'
 ```
 
 ## MCP-Ressourcen
@@ -227,6 +227,54 @@ Finde alle Tabellen und Spalten, die mit [Suchbegriff] zu tun haben könnten.
 
 > **Hinweis:** Mit dem Tool `list_tools` können LLMs und Clients alle verfügbaren Tools und deren Parameter dynamisch abfragen und so die Interaktion automatisieren oder Vorschläge generieren.
 
+## Deployment mit Docker und Docker Compose
+
+### Docker
+
+Sie können den MCP-Server auch in einem Docker-Container betreiben. Ein passendes `Dockerfile` ist im Repository enthalten.
+
+**Build und Starten des Containers:**
+
+```bash
+docker build -t mcp-proalpha .
+docker run -p 8000:8000 --env-file .env mcp-proalpha
+```
+
+- Die Umgebungsvariablen werden über die `.env`-Datei gesetzt (siehe Abschnitt Installation).
+- Der Server ist dann unter `http://localhost:8000` erreichbar.
+- Falls Sie auch die REST-API zur Verfügung stellen möchten, denken Sie daran, zusätzlich Port 8081 zu mappen:
+
+```bash
+docker run -p 8000:8000 -p 8081:8081 --env-file .env mcp-proalpha
+```
+
+### Docker Compose
+
+Für komplexere Setups (z.B. mit mehreren Services oder persistenter Speicherung) empfiehlt sich Docker Compose. Ein Beispiel für eine `docker-compose.yml` ist im Repository enthalten:
+
+```yaml
+version: '3.8'
+services:
+  mcp-proalpha:
+    build: .
+    ports:
+      - "8000:8000"
+      - "8081:8081"  # API-Server-Port, falls benötigt
+    env_file:
+      - .env
+    volumes:
+      - ./schema_cache:/app/schema_cache
+```
+
+**Starten mit Docker Compose:**
+
+```bash
+docker-compose up --build
+```
+
+- Die Daten im Ordner `schema_cache` werden im Container persistiert.
+- Die Konfiguration erfolgt weiterhin über die `.env`-Datei.
+
 ## Lizenz
 
-MIT ([siehe LICENSE](./LICENSE))
+MIT ([LICENSE](./LICENSE))
